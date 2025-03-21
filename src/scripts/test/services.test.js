@@ -16,30 +16,34 @@ const variables = require("../modules/variables.js"); //chamada DEPOIS de defini
 
 
 // Agora podemos importar os módulos que dependem de `variables.js`, porque variables está apontando para o DOM correto do Jest
-const { getUser } = require("../modules/services.js");
-const { showUser } = require("../modules/htmlSetters.js");
+const { getUser, getRepositories } = require("../modules/services.js");
+const { showUser, showRepositories } = require("../modules/htmlSetters.js");
+const { test } = require("@jest/globals");
 
 // Mockamos `showUser` para evitar manipulação real do DOM
 jest.mock("../modules/htmlSetters.js", () => ({
-  showUser: jest.fn(), //cria uma função espiã (spy), que permite verificar se foi chamada, com quais argumentos, etc.
+   showUser: jest.fn(), //cria uma função espiã (spy), que permite verificar se foi chamada, com quais argumentos, etc.
+   showRepositories: jest.fn()
 }));
 
 global.fetch = jest.fn(); //Isso substitui fetch globalmente por um mock. Como o Jest roda no Node.js, ele não tem o fetch do navegador nativamente.
 
-describe("getUser", () => {
+describe("getUser and getRepositories", () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  test("Deve buscar um usuário e chamar showUser", async () => {
-    const fakeProfile = {
-      login: "nataliadev",
-      name: "Natália",
-      avatar_url: "https://example.com/avatar.jpg",
-      bio: "Desenvolvedora",
-    };
+  const fakeProfile = {
+    login: "nataliadev",
+    name: "Natália",
+    avatar_url: "https://example.com/avatar.jpg",
+    bio: "Desenvolvedora",
+    repos_url: "https://api.github.com/users/nataliadev/repos"
+  };
 
-    fetch.mockResolvedValueOnce({
+  test("should get an user and call showUser and getRepositories", async () => {
+    
+    fetch.mockResolvedValue({
       ok: true,
       json: jest.fn().mockResolvedValue(fakeProfile),
     }); //Manipula qual deve ser a resposta do fetch mockado na linha 27
@@ -47,7 +51,29 @@ describe("getUser", () => {
     await getUser("nataliadev");
 
     expect(fetch).toHaveBeenCalledWith("https://api.github.com/users/nataliadev");
-    expect(fetch).toHaveBeenCalledTimes(1);
+    expect(fetch).toHaveBeenCalledWith(fakeProfile.repos_url);
+    expect(fetch).toHaveBeenCalledTimes(2);
     expect(showUser).toHaveBeenCalledWith(fakeProfile);
   });
+
+  test("should get user's repositories and call showRepositories", async () => {
+    const fakeRepositories = [{
+      html_url: "https://example.com/repo1",
+      name: "testing-jest"
+    },{
+      html_url: "https://example.com/repo2",
+      name: "testing-fetch"
+    }]
+
+    fetch.mockResolvedValue({
+      ok: true,
+      json: jest.fn().mockResolvedValue(fakeRepositories),
+    });
+
+    await getRepositories(fakeProfile);
+
+    expect(fetch).toHaveBeenCalledWith(fakeProfile.repos_url);
+    expect(fetch).toHaveBeenCalledTimes(1);
+    expect(showRepositories).toHaveBeenCalledWith(fakeRepositories);
+  })
 });

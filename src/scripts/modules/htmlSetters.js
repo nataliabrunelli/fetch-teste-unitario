@@ -15,23 +15,23 @@ async function showUser(profile) {
                               </div>`;
 }
 
-// async function showRepositories(repositories) {
-//   let itensRepositorio = "";
+async function showRepositories(repositories) {
+  let itensRepositorio = "";
 
-//   if (repositories.length) {
-//     repositories.forEach((repositorio, index) => {
-//       if (index < 10) {
-//         itensRepositorio += `<li><a href = "${repositorio.html_url}" target="_blank">${repositorio.name}</a><li>`;
-//       }
-//     });
-//   } else {
-//     itensRepositorio = "Usuário sem repositórios";
-//   }
+  if (repositories.length) {
+    repositories.forEach((repositorio, index) => {
+      if (index < 10) {
+        itensRepositorio += `<li><a href = "${repositorio.html_url}" target="_blank">${repositorio.name}</a><li>`;
+      }
+    });
+  } else {
+    itensRepositorio = "Usuário sem repositórios";
+  }
 
-//   infosContainer.innerHTML += `<div class="repositories">
-//                                   <h2>Repositórios</h2>
-//                                   <ul>${itensRepositorio}</ul>
-//                                 </div>`;
-// }
+  infosContainer.innerHTML += `<div class="repositories">
+                                  <h2>Repositórios</h2>
+                                  <ul>${itensRepositorio}</ul>
+                                </div>`;
+}
 
-export { showUser}
+export { showUser, showRepositories }
